@@ -1,0 +1,89 @@
+# version: "3.9"  # Recommended modern version, even though Docker warns it's optional
+
+services:
+
+  # ----------------------------
+  # PHP / Laravel Application
+  # ----------------------------
+  app:
+    build:
+      context: .                 # Build context is the root of the project
+      dockerfile: docker/php/Dockerfile
+      args:
+        UID: 1000                # Match container user UID to host for file permissions
+        GID: 1000                # Match container user GID to host
+    container_name: passport-laravel10-app
+    restart: unless-stopped
+    working_dir: /var/www        # Default working directory inside container
+    volumes:
+      - ./src:/var/www:z         # Mount Laravel project source code (SELinux-friendly)
+    networks:
+      - passport                 # Shared network so Nginx and MySQL can talk
+
+  # ----------------------------
+  # Nginx Web Server
+  # ----------------------------
+  nginx:
+    image: nginx:alpine
+    container_name: passport-laravel10-nginx
+    # restart: unless-stopped
+    ports:
+      - "8080:80"                # Map container port 80 → host port 8080
+                                  # Use localhost:8080 if host Nginx is running
+    volumes:
+      - ./src:/var/www:z         # Serve project files
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:Z  # Nginx config mount
+    depends_on:
+      - app                      # Wait for PHP container before starting
+    networks:
+      - passport
+
+  # ----------------------------
+  # MySQL Database
+  # ----------------------------
+  mysql:
+    image: mysql:8.0
+    container_name: passport-laravel10-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: laravel     # Database name
+      MYSQL_ROOT_PASSWORD: root   # Root password
+      MYSQL_USER: laravel         # Custom user
+      MYSQL_PASSWORD: laravel     # Password for custom user
+    # ports:
+    #   - "3307:3306"             # Uncomment if you want host access to MySQL
+    volumes:
+      - mysql_data:/var/lib/mysql # Persist database data
+    networks:
+      - passport
+
+  # ----------------------------
+  # phpMyAdmin (Optional, recommended for DB access)
+  # ----------------------------
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: passport-laravel10-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql              # Point to MySQL service inside Docker
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "8081:80"                  # Access phpMyAdmin at http://localhost:8081
+    depends_on:
+      - mysql
+    networks:
+      - passport
+
+# ----------------------------
+# Volumes (persisted data)
+# ----------------------------
+volumes:
+  mysql_data:
+
+# ----------------------------
+# Networks
+# ----------------------------
+networks:
+  passport:
+    driver: bridge
