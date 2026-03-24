@@ -28,8 +28,13 @@ Route::namespace('App\Http\Controllers\API')->group(function () {
         // Role Resource
         Route::apiResource('roles', 'RoleController')->middleware('role.maintenance');
 
-        // Pe Resource
-        Route::apiResource('permissions', 'PermissionController')->middleware('permission.maintenance');
+        // Permission Resource
+        // Route::apiResource('permissions', 'PermissionController')->middleware('permission.maintenance');\
+        
+        Route::prefix('permissions')->group(function () {
+            Route::get('/', 'PermissionController@index')
+                 ->middleware('permission.maintenance:permission-list');
+        });
     });
 });
 

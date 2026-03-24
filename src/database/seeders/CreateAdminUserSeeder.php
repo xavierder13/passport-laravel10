@@ -15,14 +15,14 @@ class CreateAdminUserSeeder extends Seeder
      */
     public function run()
     {
-        $user = User::create([
+        $user = User::firstOrCreate([
         	'name' => 'Administrator', 
             'email' => 'admin@webportal.ac',
         	'password' => bcrypt('123$qweR'),
             'active' => true,
         ]);
 
-        $role = Role::firstOrCreate(['name' => 'Administrator']);
+        $role = Role::firstOrCreate(['name' => 'Administrator', 'guard_name' => 'api']);
 
         $permissions = Permission::pluck('id','id')->all();
 
