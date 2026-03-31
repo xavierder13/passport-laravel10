@@ -27,7 +27,7 @@ COPY src/ .
 RUN composer install --no-dev --optimize-autoloader
 
 # Generate APP_KEY for Laravel
-RUN php artisan key:generate
+# RUN php artisan key:generate
 
 # Expose Render port
 EXPOSE 10000
