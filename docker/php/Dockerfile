@@ -17,4 +17,24 @@ RUN groupadd -g ${GID} laravel \
 
 WORKDIR /var/www
 
+
+# ---------- START: For production set up ---------- 
+
+# Copy Laravel app from src folder
+COPY src/ .
+
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader
+
+# Generate APP_KEY for Laravel
+RUN php artisan key:generate
+
+# Expose Render port
+EXPOSE 10000
+
+# Run Laravel server
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=10000"]
+
+# ---------- END: For production set up ---------- 
+
 USER laravel
