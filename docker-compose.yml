@@ -7,14 +7,16 @@ services:
   # ----------------------------
   app:
     build:
-      context: .                 # Build context is the root of the project
-      dockerfile: docker/php/Dockerfile
+      context: ./src                 # Build context is the root of the project
+      dockerfile: ../Dockerfile
       args:
         UID: 1000                # Match container user UID to host for file permissions
         GID: 1000                # Match container user GID to host
     container_name: passport-laravel10-app
-    restart: unless-stopped
+    # restart: unless-stopped
     working_dir: /var/www        # Default working directory inside container
+    extra_hosts:
+      - "vueportal.test:host-gateway"  # Host Gateway to access dockerized project the local machine project
     volumes:
       - ./src:/var/www:z         # Mount Laravel project source code (SELinux-friendly)
     networks:
@@ -28,7 +30,7 @@ services:
     container_name: passport-laravel10-nginx
     # restart: unless-stopped
     ports:
-      - "8080:80"                # Map container port 80 → host port 8080
+      - "8100:80"                # Map container port 80 → host port 8080
                                   # Use localhost:8080 if host Nginx is running
     volumes:
       - ./src:/var/www:z         # Serve project files
@@ -44,7 +46,7 @@ services:
   mysql:
     image: mysql:8.0
     container_name: passport-laravel10-mysql
-    restart: unless-stopped
+    # restart: unless-stopped
     environment:
       MYSQL_DATABASE: laravel     # Database name
       MYSQL_ROOT_PASSWORD: root   # Root password
@@ -63,13 +65,13 @@ services:
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
     container_name: passport-laravel10-phpmyadmin
-    restart: unless-stopped
+    # restart: unless-stopped
     environment:
       PMA_HOST: mysql              # Point to MySQL service inside Docker
       PMA_PORT: 3306
       MYSQL_ROOT_PASSWORD: root
     ports:
-      - "8081:80"                  # Access phpMyAdmin at http://localhost:8081
+      - "8101:80"                  # Access phpMyAdmin at http://localhost:8081
     depends_on:
       - mysql
     networks:

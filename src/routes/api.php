@@ -36,6 +36,16 @@ Route::namespace('App\Http\Controllers\API')->group(function () {
                  ->middleware('permission.maintenance:permission-list');
         });
     });
+
+    // test for centralized auth server
+    Route::middleware('remote.auth')->group(function () {
+        
+        //KPI Template Resource 
+        Route::apiResource('kpi-templates', 'KPITemplateController')
+             ->middleware('require.permission:kpi-template-list');
+    });
+
+    Route::get('/sales', 'SqlController@sales');
 });
 
 

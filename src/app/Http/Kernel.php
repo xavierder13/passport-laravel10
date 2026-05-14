@@ -67,5 +67,10 @@ class Kernel extends HttpKernel
         'user.maintenance' => \App\Http\Middleware\UserMaintenance::class,
         'role.maintenance' => \App\Http\Middleware\RoleMaintenance::class,
         'permission.maintenance' => \App\Http\Middleware\PermissionMaintenance::class,
+        
+
+        // for testing remote access for centralized auth server
+        'remote.auth'   => \App\Http\Middleware\ValidateRemoteToken::class,
+        'require.permission'  => \App\Http\Middleware\RequirePermission::class,
     ];
 }
